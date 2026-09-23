@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Identifica tu estilo de liderazgo (Copy)</title>
+<style>
+  :root {
+    --purple: #5B2E8F;
+    --purple-mid: #6E4B9E;
+    --purple-dark: #2E2450;
+    --orange: #EC5A24;
+    --orange2: #DF6036;
+    --lilac: #B9A6D9;
+    --lilac-bg: #EFEAF7;
+    --gray: #6B6580;
+    --bg: #FFFFFF;
+    --text: #2E2450;
+    --card-bg: #F7F5FB;
+    --border: #E1D9F0;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-sizing: border-box;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1C1730;
+      --text: #F1ECFB;
+      --card-bg: #241D3D;
+      --border: #3A2F5C;
+      --lilac-bg: #2C2448;
+      --gray: #B7AFD1;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1C1730;
+    --text: #F1ECFB;
+    --card-bg: #241D3D;
+    --border: #3A2F5C;
+    --lilac-bg: #2C2448;
+    --gray: #B7AFD1;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 18px 60px;
+  }
+  header.top {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .kicker {
+    color: var(--orange);
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  h1 {
+    color: var(--purple);
+    font-size: 26px;
+    margin: 0 0 8px;
+    line-height: 1.2;
+  }
+  .sub {
+    color: var(--gray);
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0 auto;
+    max-width: 520px;
+  }
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin: 22px 0 18px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 4px;
+  }
+  .tab-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--gray);
+    font-weight: 700;
+    font-size: 13px;
+    padding: 10px 8px;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .tab-btn.active {
+    background: var(--purple);
+    color: #fff;
+  }
+  .view { display: none; }
+  .view.active { display: block; }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 16px;
+    margin-bottom: 12px;
+  }
+  .q-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--purple);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    margin-right: 8px;
+    flex-shrink: 0;
+  }
+  .q-text {
+    font-size: 15px;
+    line-height: 1.4;
+    margin: 8px 0 12px;
+  }
+  .q-head { display: flex; align-items: flex-start; }
+  .scale {
+    display: flex;
+    gap: 6px;
+  }
+  .scale button {
+    flex: 1;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    border-radius: 9px;
+    padding: 9px 4px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .12s ease;
+  }
+  .scale button .n { display: block; font-size: 15px; }
+  .scale button.sel {
+    background: var(--orange);
+    border-color: var(--orange);
+    color: #fff;
+  }
+  .scale-legend {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--gray);
+    margin-top: 6px;
+    padding: 0 2px;
+  }
+
+  .progress-wrap {
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    padding: 10px 0;
+    z-index: 5;
+  }
+  .progress-bar {
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--orange), var(--purple));
+    width: 0%;
+    transition: width .2s ease;
+  }
+  .progress-label {
+    text-align: center;
+    font-size: 12px;
+    color: var(--gray);
+    margin-top: 6px;
+  }
+
+  .btn {
+    display: block;
+    width: 100%;
+    border: none;
+    background: var(--purple);
+    color: #fff;
+    font-weight: 800;
+    font-size: 15px;
+    padding: 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-top: 16px;
+  }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+  .btn.secondary {
+    background: transparent;
+    border: 1.5px solid var(--purple);
+    color: var(--purple);
+  }
+  .btn.orange { background: var(--orange); }
+
+  .results-hero {
+    text-align: center;
+    margin-bottom: 18px;
+  }
+  .podium {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 18px 0;
+  }
+  .podium-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-left: 6px solid var(--orange);
+    border-radius: 12px;
+    padding: 14px 14px;
+  }
+  .podium-item:nth-child(2) { border-left-color: var(--purple-mid); }
+  .podium-item:nth-child(3) { border-left-color: var(--purple-dark); }
+  .rank {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--orange);
+    width: 30px;
+    flex-shrink: 0;
+    text-align: center;
+  }
+  .podium-item:nth-child(2) .rank { color: var(--purple-mid); }
+  .podium-item:nth-child(3) .rank { color: var(--purple-dark); }
+  .podium-name { font-weight: 800; font-size: 16px; color: var(--purple); }
+  .podium-desc { font-size: 13px; color: var(--gray); margin-top: 2px; }
+  .podium-score { font-size: 12px; color: var(--gray); margin-left: auto; text-align: right; flex-shrink: 0; }
+
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 12px;
+  }
+  .bar-name { width: 155px; flex-shrink: 0; color: var(--text); text-align: right; }
+  .bar-track { flex: 1; background: var(--border); border-radius: 6px; height: 16px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--purple); border-radius: 6px; }
+  .bar-val { width: 22px; flex-shrink: 0; font-weight: 700; color: var(--gray); }
+
+  .share-box {
+    background: var(--lilac-bg);
+    border-radius: 14px;
+    padding: 16px;
+    margin-top: 20px;
+  }
+  .share-box input {
+    width: 100%;
+    padding: 11px 12px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    margin: 10px 0 12px;
+  }
+  .note { font-size: 12px; color: var(--gray); line-height: 1.5; }
+  .hidden { display: none !important; }
+
+  .group-summary { text-align: center; margin-bottom: 18px; }
+  .group-count { font-size: 34px; font-weight: 900; color: var(--purple); }
+  .empty-state { text-align: center; color: var(--gray); padding: 40px 20px; font-size: 14px; }
+  .spin { animation: spin 1s linear infinite; display:inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  footer.brand {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 11px;
+    color: var(--gray);
+    letter-spacing: .5px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="kicker">Ejercicio práctico</div>
+    <h1>Identifica tu estilo de liderazgo</h1>
+    <p class="sub">Responde 16 afirmaciones y descubre tus 3 estilos principales. Luego compártelo para ver el mapa de todo el grupo.</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="quiz">Mi encuesta</button>
+    <button class="tab-btn" data-tab="group">Mapa del grupo</button>
+  </div>
+
+  <!-- QUIZ VIEW -->
+  <div class="view active" id="view-quiz">
+
+    <div id="quiz-intro">
+      <div class="card">
+        <p class="q-text" style="margin-top:0">Para cada afirmación, marca qué tanto te representa:</p>
+        <div class="scale-legend" style="justify-content:flex-start; gap:14px; font-size:12px;">
+          <span><b>0</b> No me representa</span>
+          <span><b>1</b> Un poco</span>
+          <span><b>2</b> Bastante</span>
+          <span><b>3</b> Muy presente en mí</span>
+        </div>
+      </div>
+      <button class="btn" id="start-btn">Empezar</button>
+    </div>
+
+    <div id="quiz-form" class="hidden">
+      <div class="progress-wrap">
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <div class="progress-label" id="progress-label">0 de 16 respondidas</div>
+      </div>
+      <div id="questions"></div>
+      <button class="btn" id="see-results-btn" disabled>Ver mis resultados</button>
+    </div>
+
+    <div id="quiz-results" class="hidden">
+      <div class="results-hero">
+        <div class="kicker">Tus resultados</div>
+        <h1 style="font-size:20px;">Tus 3 estilos principales</h1>
+      </div>
+      <div class="podium" id="podium"></div>
+
+      <div class="card">
+        <p class="q-text" style="margin-top:0; font-weight:700; color:var(--purple);">Todos tus puntajes</p>
+        <div id="all-bars"></div>
+      </div>
+
+      <div class="share-box" id="share-box">
+        <p style="margin:0; font-weight:800; color:var(--purple);">Compártelo con el grupo</p>
+        <p class="note" style="margin:6px 0 0;">Se suma de forma anónima al mapa del grupo. Tu nombre (opcional) solo ayuda a quien facilita a dar seguimiento.</p>
+        <input type="text" id="name-input" placeholder="Tu nombre (opcional)">
+        <button class="btn orange" id="share-btn">Sumar mi resultado al mapa del grupo</button>
+        <p class="note" id="share-status" style="margin-top:10px;"></p>
+      </div>
+
+      <button class="btn secondary" id="retake-btn">Volver a responder</button>
+    </div>
+  </div>
+
+  <!-- GROUP VIEW -->
+  <div class="view" id="view-group">
+    <div class="group-summary">
+      <div class="group-count" id="group-count">0</div>
+      <div class="note">personas han compartido su resultado</div>
+    </div>
+    <div id="group-chart"></div>
+    <div id="group-empty" class="empty-state hidden">Todavía nadie ha compartido su resultado aquí. En cuanto alguien lo haga desde la pestaña "Mi encuesta", aparecerá el mapa en vivo.</div>
+  </div>
+
+  <footer class="brand">Liderazgo político y tipos de liderazgo de las mujeres</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+// ---------- Configuración de Supabase ----------
+const SUPABASE_URL = "PEGA_AQUI_TU_SUPABASE_URL";
+const SUPABASE_ANON_KEY = "sb_publishable_gTf4WX3GyU5AoFge-XyT8A_QjO_VQhs";
+
+const STATEMENTS = [
+"Me entusiasma inspirar a otras personas con una visión de cambio, más allá de mi tarea inmediata.",
+"Prefiero acordar objetivos claros y reconocer el cumplimiento con incentivos concretos.",
+"Pongo las necesidades del equipo antes que las mías; lidero resolviendo lo que a otras las frena.",
+"Conecto personas y organizaciones distintas para sumar capacidades y construir alianzas.",
+"Cambio mi forma de dirigir según qué tan autónomo esté el equipo en cada momento.",
+"Muevo a la gente sobre todo por mi presencia, mi forma de contar las cosas y la conexión que genero.",
+"Antes de decidir, abro espacio para escuchar y construir acuerdo con quienes participan.",
+"Mi liderazgo nace del trabajo cercano con mi comunidad o mi barrio, no de un cargo formal.",
+"Ejerzo mi liderazgo desde un cargo, un partido o una institución formal.",
+"Lidero desde el activismo: mi fuerza está en movilizar y visibilizar una causa.",
+"Cuestiono activamente las relaciones desiguales de poder en los espacios donde participo.",
+"Pongo la sostenibilidad de la vida y el bienestar colectivo en el centro de mis decisiones.",
+"Se me da bien tender puentes entre posturas distintas y cerrar acuerdos concretos.",
+"Mi autoridad viene del conocimiento: la gente confía en mí por mi experiencia o mis datos.",
+"No tengo miedo de cuestionar cómo se han hecho siempre las cosas y proponer algo distinto.",
+"Prefiero tomar las decisiones directamente y avanzar rápido, más que deliberar en grupo.",
+];
+const STYLES = [
+"Transformacional","Transaccional","Servicial","Colaborativo / en red","Situacional","Carismático",
+"Participativo / democrático","Comunitario y territorial","Institucional","Social y de movimientos",
+"Feminista","De cuidados","Negociador / pragmático","Técnico o especializado","Disruptivo","Autoritario / centralizado"
+];
+const DESCRIPTIONS = [
+"Inspira una visión colectiva y moviliza a superar los propios intereses.",
+"Se basa en acuerdos, incentivos y cumplimiento de metas.",
+"Lidera desde el cuidado y el servicio a las necesidades del grupo.",
+"Conecta personas y causas para distribuir capacidades.",
+"Adapta el estilo a la madurez y autonomía del equipo.",
+"Moviliza por presencia pública, narrativa y conexión emocional.",
+"Construye acuerdos y comparte la toma de decisiones.",
+"Construye poder desde el trabajo cercano con la comunidad.",
+"Actúa desde partidos, gobiernos u organismos públicos.",
+"Nace del activismo y la incidencia pública.",
+"Cuestiona relaciones de poder y promueve igualdad sustantiva.",
+"Centra la sostenibilidad de la vida y la corresponsabilidad.",
+"Construye coaliciones y administra conflictos.",
+"Legitimidad desde el conocimiento y la evidencia.",
+"Confronta prácticas establecidas y abre espacios nuevos.",
+"Concentra decisiones y privilegia el control.",
+];
+
+let answers = new Array(16).fill(null);
+let lastTop3 = null;
+let db = null;
+let dbReady = false;
+
+function $(id){ return document.getElementById(id); }
+
+// ---------- Tabs ----------
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+    btn.classList.add("active");
+    $("view-" + btn.dataset.tab).classList.add("active");
+    if (btn.dataset.tab === "group") loadGroup();
+  });
+});
+
+// ---------- Build questions ----------
+function buildQuestions() {
+  const container = $("questions");
+  container.innerHTML = "";
+  STATEMENTS.forEach((text, i) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="q-head">
+        <span class="q-num">${i+1}</span>
+        <p class="q-text" style="margin:2px 0 0;">${text}</p>
+      </div>
+      <div class="scale" data-idx="${i}">
+        ${[0,1,2,3].map(v => `<button type="button" data-val="${v}"><span class="n">${v}</span></button>`).join("")}
+      </div>
+    `;
+    container.appendChild(card);
+    card.querySelectorAll(".scale button").forEach(b => {
+      b.addEventListener("click", () => {
+        const val = parseInt(b.dataset.val, 10);
+        answers[i] = val;
+        card.querySelectorAll(".scale button").forEach(x => x.classList.remove("sel"));
+        b.classList.add("sel");
+        updateProgress();
+      });
+    });
+  });
+}
+
+function updateProgress() {
+  const answered = answers.filter(a => a !== null).length;
+  $("progress-fill").style.width = (answered/16*100) + "%";
+  $("progress-label").textContent = answered + " de 16 respondidas";
+  $("see-results-btn").disabled = answered < 16;
+}
+
+$("start-btn").addEventListener("click", () => {
+  buildQuestions();
+  $("quiz-intro").classList.add("hidden");
+  $("quiz-form").classList.remove("hidden");
+});
+
+$("see-results-btn").addEventListener("click", () => {
+  showResults();
+  $("quiz-form").classList.add("hidden");
+  $("quiz-results").classList.remove("hidden");
+  window.scrollTo({top:0, behavior:"smooth"});
+});
+
+$("retake-btn").addEventListener("click", () => {
+  answers = new Array(16).fill(null);
+  lastTop3 = null;
+  $("quiz-results").classList.add("hidden");
+  $("share-status").textContent = "";
+  $("name-input").value = "";
+  $("quiz-intro").classList.remove("hidden");
+  window.scrollTo({top:0, behavior:"smooth"});
+});
+
+function computeRanking() {
+  return answers.map((score, i) => ({ idx: i, style: STYLES[i], desc: DESCRIPTIONS[i], score }))
+    .sort((a,b) => b.score - a.score);
+}
+
+function showResults() {
+  const ranked = computeRanking();
+  const top3 = ranked.slice(0,3);
+  lastTop3 = top3;
+
+  const podium = $("podium");
+  podium.innerHTML = top3.map((r, i) => `
+    <div class="podium-item">
+      <div class="rank">${i+1}</div>
+      <div style="flex:1;">
+        <div class="podium-name">${r.style}</div>
+        <div class="podium-desc">${r.desc}</div>
+      </div>
+      <div class="podium-score">${r.score}/3</div>
+    </div>
+  `).join("");
+
+  const maxScore = 3;
+  const allBars = $("all-bars");
+  allBars.innerHTML = ranked.map(r => `
+    <div class="bar-row">
+      <div class="bar-name">${r.style}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(r.score/maxScore*100)}%"></div></div>
+      <div class="bar-val">${r.score}</div>
+    </div>
+  `).join("");
+}
+
+// ---------- Share to group (Supabase) ----------
+function initDb() {
+  try {
+    if (SUPABASE_URL.startsWith("http") && SUPABASE_ANON_KEY && SUPABASE_ANON_KEY !== "PEGA_AQUI_TU_SUPABASE_ANON_KEY" && window.supabase) {
+      db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      dbReady = true;
+    }
+  } catch (e) {
+    dbReady = false;
+  }
+  if (!dbReady) {
+    $("share-box").innerHTML = '<p class="note">El mapa en vivo del grupo no está disponible en esta vista. Puedes seguir usando la encuesta individual con normalidad.</p>';
+  }
+}
+initDb();
+
+$("share-btn").addEventListener("click", async () => {
+  if (!lastTop3) return;
+  const btn = $("share-btn");
+  const status = $("share-status");
+  if (!dbReady || !db) {
+    status.textContent = "El mapa del grupo no está disponible ahora mismo.";
+    return;
+  }
+  btn.disabled = true;
+  status.textContent = "Enviando…";
+  try {
+    const name = $("name-input").value.trim();
+    const { error } = await db.from("respuestas").insert({
+      nombre: name || null,
+      top3: lastTop3.map(r => ({ style: r.style, score: r.score })),
+      scores: answers,
+      ts: Date.now(),
+    });
+    if (error) throw error;
+    status.textContent = "✓ Se sumó tu resultado al mapa del grupo.";
+    btn.textContent = "¡Listo! Puedes ver el mapa en la otra pestaña";
+  } catch (e) {
+    status.textContent = "No se pudo enviar. Intenta de nuevo en unos segundos.";
+    btn.disabled = false;
+  }
+});
+
+// ---------- Group map ----------
+let groupChannel = null;
+async function loadGroup() {
+  if (!dbReady || !db) {
+    $("group-chart").innerHTML = "";
+    $("group-empty").classList.remove("hidden");
+    $("group-empty").textContent = "El mapa en vivo del grupo no está disponible en esta vista.";
+    return;
+  }
+  $("group-chart").innerHTML = '<p class="note" style="text-align:center;"><span class="spin">↻</span> Cargando…</p>';
+  try {
+    const { data, error } = await db.from("respuestas").select("*").limit(500);
+    if (error) throw error;
+    renderGroup(data || []);
+  } catch (e) {
+    $("group-chart").innerHTML = "";
+    $("group-empty").classList.remove("hidden");
+    $("group-empty").textContent = "No se pudo cargar el mapa del grupo por ahora.";
+    return;
+  }
+  if (!groupChannel) {
+    groupChannel = db
+      .channel("respuestas-changes")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "respuestas" }, () => {
+        loadGroup();
+      })
+      .subscribe();
+  }
+}
+
+function renderGroup(docs) {
+  $("group-count").textContent = docs.length;
+  if (docs.length === 0) {
+    $("group-chart").innerHTML = "";
+    $("group-empty").classList.remove("hidden");
+    return;
+  }
+  $("group-empty").classList.add("hidden");
+
+  const counts = {};
+  STYLES.forEach(s => counts[s] = 0);
+  docs.forEach(d => {
+    (d.top3 || []).forEach(t => {
+      if (counts[t.style] !== undefined) counts[t.style] += 1;
+    });
+  });
+  const ranked = Object.entries(counts).sort((a,b) => b[1]-a[1]);
+  const max = Math.max(1, ranked[0][1]);
+
+  $("group-chart").innerHTML = `
+    <div class="card">
+      <p class="q-text" style="margin-top:0; font-weight:700; color:var(--purple);">Estilos más presentes en el grupo (top 3 de cada persona)</p>
+      ${ranked.map(([style, count]) => `
+        <div class="bar-row">
+          <div class="bar-name">${style}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${(count/max*100)}%; background:var(--orange);"></div></div>
+          <div class="bar-val">${count}</div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+</script>
+</body>
+</html>
