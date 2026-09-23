@@ -346,10 +346,10 @@
 
       <div class="share-box" id="share-box">
         <p style="margin:0; font-weight:800; color:var(--purple);">Compártelo con el grupo</p>
-        <p class="note" style="margin:6px 0 0;">Se suma de forma anónima al mapa del grupo. Tu nombre (opcional) solo ayuda a quien facilita a dar seguimiento.</p>
-        <input type="text" id="name-input" placeholder="Tu nombre (opcional)">
+        <p class="note" style="margin:6px 0 0;">Al compartir, tus puntajes se guardan y tus tres estilos principales se suman al mapa público. Tu nombre es opcional y solo está disponible para quien administra la encuesta.</p>
+        <input type="text" id="name-input" maxlength="120" aria-label="Tu nombre (opcional)" placeholder="Tu nombre (opcional)">
         <button class="btn orange" id="share-btn">Sumar mi resultado al mapa del grupo</button>
-        <p class="note" id="share-status" style="margin-top:10px;"></p>
+        <p class="note" id="share-status" role="status" aria-live="polite" style="margin-top:10px;"></p>
       </div>
 
       <button class="btn secondary" id="retake-btn">Volver a responder</button>
@@ -360,7 +360,7 @@
   <div class="view" id="view-group">
     <div class="group-summary">
       <div class="group-count" id="group-count">0</div>
-      <div class="note">personas han compartido su resultado</div>
+      <div class="note">respuestas compartidas · actualización cada 10 segundos</div>
     </div>
     <div id="group-chart"></div>
     <div id="group-empty" class="empty-state hidden">Todavía nadie ha compartido su resultado aquí. En cuanto alguien lo haga desde la pestaña "Mi encuesta", aparecerá el mapa en vivo.</div>
@@ -369,11 +369,12 @@
   <footer class="brand">Liderazgo político y tipos de liderazgo de las mujeres</footer>
 </div>
 
+<script src="/config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 // ---------- Configuración de Supabase ----------
-const SUPABASE_URL = "PEGA_AQUI_TU_SUPABASE_URL";
-const SUPABASE_ANON_KEY = "sb_publishable_gTf4WX3GyU5AoFge-XyT8A_QjO_VQhs";
+const SUPABASE_URL = window.SURVEY_CONFIG?.url || "";
+const SUPABASE_ANON_KEY = window.SURVEY_CONFIG?.key || "";
 
 const STATEMENTS = [
 "Me entusiasma inspirar a otras personas con una visión de cambio, más allá de mi tarea inmediata.",
@@ -421,6 +422,9 @@ let answers = new Array(16).fill(null);
 let lastTop3 = null;
 let db = null;
 let dbReady = false;
+let submissionId = null;
+let sharing = false;
+let shared = false;
 
 function $(id){ return document.getElementById(id); }
 
@@ -485,8 +489,13 @@ $("see-results-btn").addEventListener("click", () => {
 });
 
 $("retake-btn").addEventListener("click", () => {
+  if (sharing) return;
   answers = new Array(16).fill(null);
   lastTop3 = null;
+  submissionId = null;
+  shared = false;
+  $("share-btn").disabled = !dbReady;
+  $("share-btn").textContent = "Sumar mi resultado al mapa del grupo";
   $("quiz-results").classList.add("hidden");
   $("share-status").textContent = "";
   $("name-input").value = "";
@@ -500,6 +509,7 @@ function computeRanking() {
 }
 
 function showResults() {
+  submissionId ||= crypto.randomUUID();
   const ranked = computeRanking();
   const top3 = ranked.slice(0,3);
   lastTop3 = top3;
@@ -538,13 +548,14 @@ function initDb() {
     dbReady = false;
   }
   if (!dbReady) {
-    $("share-box").innerHTML = '<p class="note">El mapa en vivo del grupo no está disponible en esta vista. Puedes seguir usando la encuesta individual con normalidad.</p>';
+    $("share-btn").disabled = true;
+    $("share-status").textContent = "El mapa del grupo no está disponible ahora. Puedes responder la encuesta individual.";
   }
 }
 initDb();
 
 $("share-btn").addEventListener("click", async () => {
-  if (!lastTop3) return;
+  if (!lastTop3 || sharing || shared || answers.some(a => !Number.isInteger(a) || a < 0 || a > 3)) return;
   const btn = $("share-btn");
   const status = $("share-status");
   if (!dbReady || !db) {
@@ -552,70 +563,69 @@ $("share-btn").addEventListener("click", async () => {
     return;
   }
   btn.disabled = true;
+  sharing = true;
+  $("retake-btn").disabled = true;
   status.textContent = "Enviando…";
   try {
     const name = $("name-input").value.trim();
-    const { error } = await db.from("respuestas").insert({
-      nombre: name || null,
-      top3: lastTop3.map(r => ({ style: r.style, score: r.score })),
-      scores: answers,
-      ts: Date.now(),
+    const { error } = await db.rpc("submit_leadership_response", {
+      p_id: submissionId,
+      p_nombre: name || null,
+      p_scores: answers,
     });
     if (error) throw error;
+    shared = true;
     status.textContent = "✓ Se sumó tu resultado al mapa del grupo.";
     btn.textContent = "¡Listo! Puedes ver el mapa en la otra pestaña";
   } catch (e) {
     status.textContent = "No se pudo enviar. Intenta de nuevo en unos segundos.";
     btn.disabled = false;
+  } finally {
+    sharing = false;
+    $("retake-btn").disabled = false;
   }
 });
 
 // ---------- Group map ----------
-let groupChannel = null;
+let groupLoading = false;
 async function loadGroup() {
+  if (groupLoading) return;
   if (!dbReady || !db) {
     $("group-chart").innerHTML = "";
     $("group-empty").classList.remove("hidden");
     $("group-empty").textContent = "El mapa en vivo del grupo no está disponible en esta vista.";
     return;
   }
-  $("group-chart").innerHTML = '<p class="note" style="text-align:center;"><span class="spin">↻</span> Cargando…</p>';
+  groupLoading = true;
   try {
-    const { data, error } = await db.from("respuestas").select("*").limit(500);
+    const { data, error } = await db.rpc("leadership_summary");
     if (error) throw error;
-    renderGroup(data || []);
+    renderGroup(data || {total: 0, counts: new Array(16).fill(0)});
   } catch (e) {
     $("group-chart").innerHTML = "";
     $("group-empty").classList.remove("hidden");
     $("group-empty").textContent = "No se pudo cargar el mapa del grupo por ahora.";
-    return;
-  }
-  if (!groupChannel) {
-    groupChannel = db
-      .channel("respuestas-changes")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "respuestas" }, () => {
-        loadGroup();
-      })
-      .subscribe();
+  } finally {
+    groupLoading = false;
   }
 }
 
-function renderGroup(docs) {
-  $("group-count").textContent = docs.length;
-  if (docs.length === 0) {
+setInterval(() => {
+  if (!document.hidden && $("view-group").classList.contains("active")) loadGroup();
+}, 10000);
+
+function renderGroup(summary) {
+  $("group-count").textContent = summary.total;
+  if (summary.total === 0) {
     $("group-chart").innerHTML = "";
     $("group-empty").classList.remove("hidden");
+    $("group-empty").textContent = "Todavía no hay respuestas compartidas. ¡Comparte la primera!";
     return;
   }
   $("group-empty").classList.add("hidden");
 
   const counts = {};
-  STYLES.forEach(s => counts[s] = 0);
-  docs.forEach(d => {
-    (d.top3 || []).forEach(t => {
-      if (counts[t.style] !== undefined) counts[t.style] += 1;
-    });
-  });
+  STYLES.forEach((s, i) => counts[s] = Number(summary.counts[i]) || 0);
   const ranked = Object.entries(counts).sort((a,b) => b[1]-a[1]);
   const max = Math.max(1, ranked[0][1]);
 
